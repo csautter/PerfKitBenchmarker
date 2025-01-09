@@ -267,7 +267,8 @@ echo "Disk capacity price GB per hour: $DISK_CAPACITY_PRICE_GB_PER_HOUR"
           --openstack_image_username=ubuntu --os_type=ubuntu2404 --zones=eu01-1 --openstack_boot_from_volume=true \
           --data_disk_size=20 --openstack_floating_ip_pool=$FLOATING_IP_POOL \
           --metadata=vm_price_per_hour:$PRICE_PER_HOUR,disk_performance_price_per_hour:$DISK_PERFORMANCE_PRICE_PER_HOUR,disk_capacity_price_gb_per_hour:$DISK_CAPACITY_PRICE_GB_PER_HOUR \
-          --openstack_volume_type=$DISK_PERFORMANCE_CLASS
+          --openstack_volume_type=$DISK_PERFORMANCE_CLASS \
+          --influx_uri=localhost:8086 --influx_db_name=perfkit
 ```
 
 ## Example run on Kubernetes

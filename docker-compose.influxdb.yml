@@ -1,0 +1,36 @@
+services:
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    restart: always
+    ports:
+      - "3000:3000"
+    networks:
+      - monitoring
+    volumes:
+      - grafana-volume:/var/lib/grafana
+      - ./provisioning:/etc/grafana/provisioning
+  influxdb:
+    image: influxdb
+    container_name: influxdb
+    restart: always
+    ports:
+      - "8086:8086"
+    networks:
+      - monitoring
+    environment:
+      - DOCKER_INFLUXDB_INIT_MODE=setup
+      - DOCKER_INFLUXDB_INIT_BUCKET=perfkit
+      - DOCKER_INFLUXDB_INIT_USERNAME=perfkit
+      - DOCKER_INFLUXDB_INIT_PASSWORD=p3rfk1t!
+      - DOCKER_INFLUXDB_INIT_ORG=perfkit
+      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=p3rfk1t!
+    volumes:
+      - influxdb-volume:/var/lib/influxdb
+networks:
+  monitoring:
+volumes:
+  grafana-volume:
+    external: true
+  influxdb-volume:
+    external: true
