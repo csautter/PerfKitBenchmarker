@@ -241,6 +241,35 @@ $ ./pkb.py --cloud=OpenStack --machine_type=m1.medium \
            --openstack_network=private --benchmarks=iperf
 ```
 
+### Example run on StackIT Cloud (with OpenStack provider)
+
+```bash
+FLAVOR="t1.1"
+echo "Flavor: $FLAVOR"
+
+FLOATING_IP_POOL=$(openstack floating ip list -f json | jq -r '.[0]."Floating Network"')
+echo "Floating IP pool: $FLOATING_IP_POOL"
+
+curl https://pim.api.eu01.stackit.cloud/v1/skus -o /tmp/skus.json
+PRICE_PER_HOUR=$(cat /tmp/skus.json | jq ".services[] | select(.attributes.cfUniqueIds[0]==\"$FLAVOR\")" | tee | jq -r .price)
+echo "Price per hour: $PRICE_PER_HOUR"
+
+
+DISK_PERFORMANCE_CLASS="storage_premium_perf1"
+echo "Disk performance class: $DISK_PERFORMANCE_CLASS"
+DISK_PERFORMANCE_PRICE_PER_HOUR=$(cat /tmp/skus.json | jq ".services[] | select(.attributes.class==\"$DISK_PERFORMANCE_CLASS\") | select(all(.attributes.cfUniqueIds[]; contains(\"metro\") | not))" | tee | jq -r .price)
+echo "Disk performance price per hour: $DISK_PERFORMANCE_PRICE_PER_HOUR"
+DISK_CAPACITY_PRICE_GB_PER_HOUR=$(cat /tmp/skus.json | jq ".services[] | select(.attributes.cfUniqueIds[0]==\"volume\")" | tee | jq -r .price)
+echo "Disk capacity price GB per hour: $DISK_CAPACITY_PRICE_GB_PER_HOUR"
+
+
+./pkb.py --cloud=OpenStack --machine_type=t1.1 --openstack_network=bench-network --benchmarks=coremark \
+          --openstack_image_username=ubuntu --os_type=ubuntu2404 --zones=eu01-1 --openstack_boot_from_volume=true \
+          --data_disk_size=20 --openstack_floating_ip_pool=$FLOATING_IP_POOL \
+          --metadata=vm_price_per_hour:$PRICE_PER_HOUR,disk_performance_price_per_hour:$DISK_PERFORMANCE_PRICE_PER_HOUR,disk_capacity_price_gb_per_hour:$DISK_CAPACITY_PRICE_GB_PER_HOUR \
+          --openstack_volume_type=$DISK_PERFORMANCE_CLASS
+```
+
 ## Example run on Kubernetes
 
 ```bash
