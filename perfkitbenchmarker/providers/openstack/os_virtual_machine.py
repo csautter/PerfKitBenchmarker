@@ -85,6 +85,7 @@ class OpenStackVirtualMachine(virtual_machine.BaseVirtualMachine):
     self.public_network = None
     self.subnet_id = None
     self.post_provisioning_script = FLAGS.openstack_post_provisioning_script
+    self.disk_size = FLAGS.data_disk_size or FLAGS.openstack_volume_size
 
   @property
   def group_id(self):
@@ -381,11 +382,10 @@ class OpenStackVirtualMachine(virtual_machine.BaseVirtualMachine):
       self.ip_address = self.floating_ip.floating_ip_address
 
   def _GetNetworkIPAddress(self, server_dict, network_name):
-    addresses = server_dict['addresses'].split(',')
-    for address in addresses:
-      if network_name in address:
-        _, ip = address.split('=')
-        return ip
+    networks = server_dict['addresses']
+    for network, addresses in networks.items():
+        if network == network_name:
+            return addresses[0]
 
   def _GetInternalNetworkCIDR(self):
     """Returns IP addresses source range of internal network."""
@@ -445,3 +445,8 @@ class ClearBasedOpenStackVirtualMachine(
     OpenStackVirtualMachine, linux_virtual_machine.ClearMixin
 ):
   DEFAULT_IMAGE = 'upstream-clear'
+
+class Ubuntu2404BasedOpenStackVirtualMachine(
+    OpenStackVirtualMachine, linux_virtual_machine.Ubuntu2404Mixin
+):
+  DEFAULT_IMAGE = '9b017750-20f6-4ea8-9e4d-0707fc3cc3b9'
