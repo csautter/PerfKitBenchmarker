@@ -24,6 +24,9 @@ import numpy as np
 from perfkitbenchmarker import errors
 import pytz
 
+import os
+os.environ['TZ'] = 'UTC'
+
 PERCENTILES_LIST = 0.1, 1, 5, 10, 50, 90, 95, 99, 99.9
 
 # Add this flag to the metadata to hide logging to console.

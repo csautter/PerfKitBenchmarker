@@ -804,29 +804,11 @@ class ElasticsearchPublisher(SamplePublisher):
     self.es_type = es_type
     self.mapping_5_plus = {
         'mappings': {
-            'result': {
-                'numeric_detection': True,
-                'properties': {
-                    'timestamp': {
-                        'type': 'date',
-                        'format': 'yyyy-MM-dd HH:mm:ss.SSSSSS',
-                    },
-                    'value': {'type': 'double'},
-                },
-                'dynamic_templates': [{
-                    'strings': {
-                        'match_mapping_type': 'string',
-                        'mapping': {
-                            'type': 'text',
-                            'fields': {
-                                'raw': {
-                                    'type': 'keyword',
-                                    'ignore_above': 256,
-                                }
-                            },
-                        },
-                    }
-                }],
+            'properties': {
+                'timestamp': {
+                    'type': 'date',
+                    'format': 'yyyy-MM-dd HH:mm:ss.SSSSSS',
+                }
             }
         }
     }
@@ -903,7 +885,6 @@ class ElasticsearchPublisher(SamplePublisher):
       # as each ES's document's unique _id
       es.create(
           index=self.es_index,
-          doc_type=self.es_type,
           id=sample['sample_uri'],
           body=json.dumps(sample),
       )
