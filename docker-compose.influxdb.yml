@@ -11,7 +11,7 @@ services:
       - grafana-volume:/var/lib/grafana
       - ./provisioning:/etc/grafana/provisioning
   influxdb:
-    image: influxdb
+    image: influxdb:1.11
     container_name: influxdb
     restart: always
     ports:
@@ -19,12 +19,18 @@ services:
     networks:
       - monitoring
     environment:
-      - DOCKER_INFLUXDB_INIT_MODE=setup
-      - DOCKER_INFLUXDB_INIT_BUCKET=perfkit
-      - DOCKER_INFLUXDB_INIT_USERNAME=perfkit
-      - DOCKER_INFLUXDB_INIT_PASSWORD=p3rfk1t!
-      - DOCKER_INFLUXDB_INIT_ORG=perfkit
-      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=p3rfk1t!
+      - INFLUXDB_DB=perfkit
+      - INFLUXDB_HTTP_AUTH_ENABLED=false
+      #- INFLUXDB_ADMIN_USER=perfkit_admin
+      #- INFLUXDB_ADMIN_PASSWORD=p3rfk1t!
+      #- INFLUXDB_WRITE_USER=perfkit
+      #- INFLUXDB_WRITE_USER_PASSWORD=p3rfk1t!
+      #- DOCKER_INFLUXDB_INIT_MODE=setup
+      #- DOCKER_INFLUXDB_INIT_BUCKET=perfkit
+      #- DOCKER_INFLUXDB_INIT_USERNAME=perfkit
+      #- DOCKER_INFLUXDB_INIT_PASSWORD=p3rfk1t!
+      #- DOCKER_INFLUXDB_INIT_ORG=perfkit
+      #- DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=p3rfk1t!
     volumes:
       - influxdb-volume:/var/lib/influxdb
 networks:

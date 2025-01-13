@@ -7,7 +7,7 @@ datasources:
     url: http://influxdb:8086
     database: perfkit
     user: perfkit
-    password: p3rfk1t
+    password: p3rfk1t!
     isDefault: true
     jsonData:
       httpMode: POST
