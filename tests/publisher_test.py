@@ -755,8 +755,7 @@ class InfluxDBPublisherTestCase(unittest.TestCase):
     mock_publish_method.assert_called_once_with(expected)
 
   @mock.patch.object(publisher.InfluxDBPublisher, '_WriteData')
-  @mock.patch.object(publisher.InfluxDBPublisher, '_CreateDB')
-  def testPublish(self, mock_create_db, mock_write_data):
+  def testPublish(self, mock_write_data):
     formatted_samples = [
         (
             'perfkitbenchmarker,test=testc,official=1.0,owner=Rackspace,'
@@ -785,11 +784,69 @@ class InfluxDBPublisherTestCase(unittest.TestCase):
         'metric=3,unit=us value=non 123000000000'
     )
 
-    mock_create_db.return_value = None
     mock_write_data.return_value = None
     self.test_db._Publish(formatted_samples)
-    mock_create_db.assert_called_once()
     mock_write_data.assert_called_once_with(expected_output)
+
+  def testPublishIntegration(self):
+    test_db = publisher.InfluxDBPublisher('localhost:8086', 'perfkit')
+    samples = [
+        {
+            'test': 'testc',
+            'metric': '1',
+            'official': 1.0,
+            'value': 'non',
+            'unit': 'MB',
+            'owner': 'Rackspace',
+            'run_uri': '323',
+            'sample_uri': '33',
+            'timestamp': 123,
+            'metadata': collections.OrderedDict(
+                [('info', '1'), ('more_info', '2'), ('bar', 'foo')]
+            ),
+        },
+        {
+            'test': 'testb',
+            'metric': '2',
+            'official': 14.0,
+            'value': 'non',
+            'unit': 'MB',
+            'owner': 'Rackspace',
+            'run_uri': 'bba3',
+            'sample_uri': 'bb',
+            'timestamp': 55,
+            'metadata': collections.OrderedDict(),
+        },
+        {
+            'test': 'testa',
+            'metric': '3',
+            'official': 47.0,
+            'value': 'non',
+            'unit': 'us',
+            'owner': 'Rackspace',
+            'run_uri': '5rtw',
+            'sample_uri': '5r',
+            'timestamp': 123,
+        },
+    ]
+
+    formatted_samples = [
+        (
+            'perfkitbenchmarker,test=testc,official=1.0,owner=Rackspace,'
+            'run_uri=323,sample_uri=33,metric=1,unit=MB,info=1,more_info=2,'
+            'bar=foo value=non 123000000000'
+        ),
+        (
+            'perfkitbenchmarker,test=testb,official=14.0,owner=Rackspace,'
+            'run_uri=bba3,sample_uri=bb,metric=2,unit=MB value=non 55000000000'
+        ),
+        (
+            'perfkitbenchmarker,test=testa,official=47.0,owner=Rackspace,'
+            'run_uri=5rtw,sample_uri=5r,metric=3,unit=us value=non 123000000000'
+        ),
+    ]
+
+    test_db._Publish(formatted_samples)
 
 
 class LabelEncodingTestCase(unittest.TestCase):

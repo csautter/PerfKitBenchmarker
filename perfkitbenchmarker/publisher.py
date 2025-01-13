@@ -46,6 +46,10 @@ import pytz
 import six
 from six.moves import urllib
 
+import influxdb_client, os, time
+from influxdb_client import InfluxDBClient, Point, WritePrecision
+from influxdb_client.client.write_api import SYNCHRONOUS
+
 FLAGS = flags.FLAGS
 
 flags.DEFINE_string(
@@ -938,6 +942,7 @@ class InfluxDBPublisher(SamplePublisher):
     # set to default above in flags unless changed
     self.influx_uri = influx_uri
     self.influx_db_name = influx_db_name
+    self.influx_token = ""
 
   def PublishSamples(self, samples):
     formated_samples = []
@@ -947,7 +952,7 @@ class InfluxDBPublisher(SamplePublisher):
 
   def _Publish(self, formated_samples):
     try:
-      self._CreateDB()
+      #self._CreateDB()
       body = '\n'.join(formated_samples)
       self._WriteData(body)
     except (OSError, httplib.HTTPException) as http_exception:
@@ -1010,6 +1015,7 @@ class InfluxDBPublisher(SamplePublisher):
         'Content-type': 'application/x-www-form-urlencoded',
         'Accept': 'text/plain',
     }
+
     params = urllib.parse.urlencode(
         {'q': 'CREATE DATABASE ' + self.influx_db_name}
     )
@@ -1029,26 +1035,15 @@ class InfluxDBPublisher(SamplePublisher):
 
   # pylint: disable=missing-function-docstring
   def _WriteData(self, data):
-    successful_http_request_codes = [200, 202, 204]
-    params = data
-    header = {'Content-type': 'application/octet-stream'}
-    conn = httplib.HTTPConnection(self.influx_uri)
-    conn.request(
-        'POST', '/write?' + 'db=' + self.influx_db_name, params, headers=header
-    )
-    response = conn.getresponse()
-    conn.close()
-    if response.status in successful_http_request_codes:
-      logging.debug('Writing samples to publisher: writing samples.')
-    else:
-      logging.error(
-          '%d Request could not be completed due to: %s %s',
-          response.status,
-          response.reason,
-          data,
-      )
-      raise httplib.HTTPException
+    url = "http://localhost:8086"
 
+    write_client = influxdb_client.InfluxDBClient(url=url, token=self.influx_token, org="perfkit")
+
+    bucket = "perfkit"
+
+    write_api = write_client.write_api(write_options=SYNCHRONOUS)
+    for line in data:
+        write_api.write(bucket=bucket, org="perfkit", record=line)
 
 class SampleCollector:
   """A performance sample collector.
