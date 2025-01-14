@@ -803,11 +803,30 @@ class ElasticsearchPublisher(SamplePublisher):
     self.es_index = es_index.lower()
     self.es_type = es_type
     self.mapping_5_plus = {
+        "settings": {
+            "index.mapping.coerce": 'true'
+        },
         'mappings': {
+            'dynamic': 'runtime',
+            'numeric_detection': 'true',
             'properties': {
                 'timestamp': {
                     'type': 'date',
                     'format': 'yyyy-MM-dd HH:mm:ss.SSSSSS',
+                },
+                'value': {'type': 'double'},
+                'metadata': {
+                    'properties': {
+                        'vm_price_per_hour': {
+                            'type': 'double',
+                        },
+                        'disk_performance_price_per_hour': {
+                            'type': 'double',
+                        },
+                        'disk_capacity_price_gb_per_hour': {
+                            'type': 'double',
+                        },
+                    }
                 }
             }
         }

@@ -24,6 +24,18 @@ services:
       - xpack.security.enrollment.enabled=false
     volumes:
       - elastic-volume:/usr/share/elasticsearch/data
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.16.2
+    container_name: kibana
+    restart: always
+    ports:
+      - "5601:5601"
+    networks:
+      - monitoring
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elastic:9200
+    depends_on:
+      - elastic
 networks:
   monitoring:
 volumes:
