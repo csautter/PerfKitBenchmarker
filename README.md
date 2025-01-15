@@ -263,10 +263,11 @@ DISK_CAPACITY_PRICE_GB_PER_HOUR=$(cat /tmp/skus.json | jq ".services[] | select(
 echo "Disk capacity price GB per hour: $DISK_CAPACITY_PRICE_GB_PER_HOUR"
 
 
-./pkb.py --cloud=OpenStack --machine_type=t1.1 --openstack_network=bench-network --benchmarks=coremark \
+./pkb.py --cloud=OpenStack --machine_type=t1.1 --openstack_network=bench-network \
+          --benchmarks=coremark,copy_throughput,fio,scimark2,sysbench --accept_licenses\
           --openstack_image_username=ubuntu --os_type=ubuntu2404 --zones=eu01-1 --openstack_boot_from_volume=true \
           --data_disk_size=20 --openstack_floating_ip_pool=$FLOATING_IP_POOL \
-          --metadata=vm_price_per_hour:$PRICE_PER_HOUR,disk_performance_price_per_hour:$DISK_PERFORMANCE_PRICE_PER_HOUR,disk_capacity_price_gb_per_hour:$DISK_CAPACITY_PRICE_GB_PER_HOUR \
+          --metadata=vm_price_per_hour:$PRICE_PER_HOUR,disk_performance_price_per_hour:$DISK_PERFORMANCE_PRICE_PER_HOUR,disk_capacity_price_gb_per_hour:$DISK_CAPACITY_PRICE_GB_PER_HOUR,disk_performance_class:$DISK_PERFORMANCE_CLASS \
           --openstack_volume_type=$DISK_PERFORMANCE_CLASS \
           --es_uri=http://localhost:9200 --es_index=perfkit --es_type=result
 ```
